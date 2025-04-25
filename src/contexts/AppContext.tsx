@@ -6,7 +6,6 @@ import {
   Logout as LogoutIcon,
   MoreHoriz as MoreIcon,
   BackupTable as ProjectsIcon,
-  WavingHand as WelcomeIcon,
 } from "@mui/icons-material";
 import {
   Avatar,
@@ -92,7 +91,6 @@ export function AppProvider({ children }: PropsWithChildren) {
   const activeTheme = dark ? darkTheme : lightTheme;
 
   const menuItems: { title: string; icon: any; route: RouterPaths }[] = [
-    { title: "Welcome", icon: <WelcomeIcon />, route: "/" },
     { title: "Home", icon: <Home />, route: "/home" },
     { title: "Projects", icon: <ProjectsIcon />, route: "/projects" },
   ];
@@ -138,31 +136,35 @@ export function AppProvider({ children }: PropsWithChildren) {
           </Stack>
 
           <Stack direction={"row"} spacing={2}>
-            <IconButton
-              onClick={(ev) => {
-                setAnchorRoutesEl(ev.currentTarget);
-              }}
-            >
-              <MoreIcon htmlColor={activeTheme.palette.text.primary} />
-            </IconButton>
-            <Menu
-              anchorEl={anchorRoutesEl}
-              open={routesOpen}
-              onClose={() => setAnchorRoutesEl(null)}
-            >
-              {menuItems.map((item) => (
-                <MenuItem
-                  key={item.route}
-                  onClick={() => {
-                    navigator(item.route);
-                    setAnchorRoutesEl(null);
+            {user && (
+              <>
+                <IconButton
+                  onClick={(ev) => {
+                    setAnchorRoutesEl(ev.currentTarget);
                   }}
                 >
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  <ListItemText>{item.title}</ListItemText>
-                </MenuItem>
-              ))}
-            </Menu>
+                  <MoreIcon htmlColor={activeTheme.palette.text.primary} />
+                </IconButton>
+                <Menu
+                  anchorEl={anchorRoutesEl}
+                  open={routesOpen}
+                  onClose={() => setAnchorRoutesEl(null)}
+                >
+                  {menuItems.map((item) => (
+                    <MenuItem
+                      key={item.route}
+                      onClick={() => {
+                        navigator(item.route);
+                        setAnchorRoutesEl(null);
+                      }}
+                    >
+                      <ListItemIcon>{item.icon}</ListItemIcon>
+                      <ListItemText>{item.title}</ListItemText>
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </>
+            )}
             <IconButton
               onClick={() => {
                 setDark(!dark);

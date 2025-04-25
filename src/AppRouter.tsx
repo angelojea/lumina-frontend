@@ -12,7 +12,7 @@ import { GoogleCallback } from "./pages/GoogleCallback";
 import { Home } from "./pages/Home";
 import { ProjectDetail } from "./pages/ProjectDetail";
 import { ProjectList } from "./pages/ProjectList";
-import { Public } from "./pages/Public";
+import { Public } from "./pages/Welcome";
 
 export type RouterPaths =
   | "/home"
@@ -84,6 +84,7 @@ export function AppRouter() {
         <Routes>
           {Object.values(AppRouterConfig).map((route) => (
             <Route
+              key={route.path}
               path={route.path}
               element={route.element}
               action={() => {
