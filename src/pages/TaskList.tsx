@@ -4,6 +4,7 @@ import {
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
 import {
+  Checkbox,
   IconButton,
   Stack,
   Table,
@@ -21,8 +22,6 @@ import {
   TextField,
   Select,
   MenuItem,
-  Checkbox,
-  Typography,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -30,17 +29,27 @@ import axios from 'axios';
 interface Task {
   id: string;
   title: string;
-  projectId: string;
-  createdAt: string;
   done: boolean;
-  project?: { id: string; name: string };
+  projectId: string | null;
+  createdAt: string;
+  project?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 interface Project {
   id: string;
   name: string;
-  status: string;
+  status: string; // Corrigido
 }
+
+const columns = [
+  { id: 'done', label: 'Done', minWidth: 50 },
+  { id: 'title', label: 'Title', minWidth: 170 },
+  { id: 'project', label: 'Project', minWidth: 170 },
+  { id: 'actions', label: 'Actions', minWidth: 170 },
+];
 
 export function TaskList() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -50,39 +59,54 @@ export function TaskList() {
 
   const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
-  const [openView, setOpenView] = useState(false);
-
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [openDetails, setOpenDetails] = useState(false);
 
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskProjectId, setNewTaskProjectId] = useState('');
 
-  useEffect(() => {
-    fetchTasks();
-    fetchProjects();
-  }, []);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editProjectId, setEditProjectId] = useState('');
 
-  async function fetchTasks() {
-    try {
-      const { data } = await axios.get('http://localhost:4000/tasks', {
-        withCredentials: true,
-      });
-      setTasks(data);
-    } catch (error) {
-      console.error('Erro ao buscar tarefas', error);
-    }
-  }
+  const [selectedProjectId, setSelectedProjectId] = useState('');
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
 
   async function fetchProjects() {
     try {
-      const { data } = await axios.get('http://localhost:4000/projects', {
+      const response = await axios.get('http://localhost:4000/projects', {
         withCredentials: true,
       });
-      setProjects(data.filter((p: Project) => p.status !== 'canceled'));
+      const filteredProjects = response.data.filter(
+        (p: Project) => p.status !== 'canceled',
+      );
+      setProjects(filteredProjects);
     } catch (error) {
-      console.error('Erro ao buscar projetos', error);
+      console.error('Error fetching projects', error);
     }
   }
+
+  const fetchTasks = async () => {
+    try {
+      const response = await axios.get('http://localhost:4000/tasks', {
+        params: selectedProjectId ? { projectId: selectedProjectId } : {},
+        withCredentials: true,
+      });
+      setTasks(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar tarefas', error);
+      setTasks([]);
+    }
+  };
 
   async function handleCreateTask() {
     try {
@@ -90,118 +114,151 @@ export function TaskList() {
         'http://localhost:4000/tasks',
         {
           title: newTaskTitle,
-          projectId: newTaskProjectId,
+          projectId: newTaskProjectId || null,
         },
         { withCredentials: true },
       );
-      setOpenCreate(false);
       setNewTaskTitle('');
       setNewTaskProjectId('');
+      setOpenCreate(false);
       fetchTasks();
     } catch (error) {
-      console.error('Erro ao criar tarefa', error);
+      console.error('Error creating task', error);
+      alert('Error creating task');
     }
   }
 
-  async function handleUpdateTask(updated: {
-    title: string;
-    projectId: string;
-  }) {
+  async function handleUpdateTask() {
     if (!selectedTask) return;
     try {
       await axios.patch(
         `http://localhost:4000/tasks/${selectedTask.id}`,
-        updated,
+        {
+          title: editTitle,
+          projectId: editProjectId || null,
+        },
         { withCredentials: true },
       );
       setOpenEdit(false);
       fetchTasks();
     } catch (error) {
-      console.error('Erro ao atualizar tarefa', error);
+      console.error('Error updating task', error);
     }
   }
 
-  async function handleDeleteTask(taskId: string) {
-    if (!window.confirm('Tem certeza que deseja excluir essa tarefa?')) return;
-    try {
-      await axios.delete(`http://localhost:4000/tasks/${taskId}`, {
-        withCredentials: true,
-      });
-      fetchTasks();
-    } catch (error) {
-      console.error('Erro ao excluir tarefa', error);
-    }
-  }
-
-  async function toggleDone(task: Task) {
+  async function handleToggleDone(task: Task) {
     try {
       await axios.patch(
         `http://localhost:4000/tasks/${task.id}`,
-        {
-          done: !task.done,
-        },
+        { done: !task.done },
         { withCredentials: true },
       );
       fetchTasks();
     } catch (error) {
-      console.error('Erro ao atualizar status da tarefa', error);
+      console.error('Error toggling task', error);
     }
   }
 
+  async function handleDeleteTask(id: string) {
+    try {
+      await axios.delete(`http://localhost:4000/tasks/${id}`, {
+        withCredentials: true,
+      });
+      fetchTasks();
+    } catch (error) {
+      console.error('Error deleting task', error);
+    }
+  }
+
+  function openEditDialog(task: Task) {
+    setSelectedTask(task);
+    setEditTitle(task.title);
+    setEditProjectId(task.projectId || '');
+    setOpenEdit(true);
+  }
+
+  function openDetailsDialog(task: Task) {
+    setSelectedTask(task);
+    setOpenDetails(true);
+  }
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [selectedProjectId]);
+
   return (
-    <Stack>
+    <Stack spacing={2}>
       <Button
         variant="contained"
+        color="primary"
         onClick={() => setOpenCreate(true)}
-        sx={{ mb: 2 }}
       >
-        Nova Tarefa
+        New Task
       </Button>
+
+      <Select
+        value={selectedProjectId}
+        onChange={(e) => setSelectedProjectId(e.target.value)}
+        displayEmpty
+      >
+        <MenuItem value="">All Projects</MenuItem>
+        {projects.map((p) => (
+          <MenuItem key={p.id} value={p.id}>
+            {p.name}
+          </MenuItem>
+        ))}
+      </Select>
+
       <TableContainer sx={{ maxHeight: 440 }}>
         <Table stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell>Título</TableCell>
-              <TableCell>Projeto</TableCell>
-              <TableCell>Feito</TableCell>
-              <TableCell>Ações</TableCell>
+              {columns.map((column) => (
+                <TableCell
+                  key={column.id}
+                  align="left"
+                  style={{ minWidth: column.minWidth }}
+                >
+                  {column.label}
+                </TableCell>
+              ))}
             </TableRow>
           </TableHead>
           <TableBody>
             {tasks.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} align="center">
-                  Nenhuma tarefa cadastrada.
+                <TableCell colSpan={columns.length} align="center">
+                  No tasks found.
                 </TableCell>
               </TableRow>
             ) : (
               tasks
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((task) => (
-                  <TableRow key={task.id}>
-                    <TableCell>{task.title}</TableCell>
-                    <TableCell>{task.project?.name || 'Nenhum'}</TableCell>
+                  <TableRow hover key={task.id}>
                     <TableCell>
                       <Checkbox
                         checked={task.done}
-                        onChange={() => toggleDone(task)}
+                        onChange={() => handleToggleDone(task)}
                       />
                     </TableCell>
+                    <TableCell>{task.title}</TableCell>
+                    <TableCell>{task.project?.name || 'None'}</TableCell>
                     <TableCell>
-                      <Stack direction="row">
+                      <Stack direction="row" spacing={1}>
                         <IconButton
-                          onClick={() => {
-                            setSelectedTask(task);
-                            setOpenView(true);
-                          }}
+                          color="default"
+                          onClick={() => openDetailsDialog(task)}
                         >
                           <VisibilityIcon />
                         </IconButton>
                         <IconButton
-                          onClick={() => {
-                            setSelectedTask(task);
-                            setOpenEdit(true);
-                          }}
+                          color="primary"
+                          onClick={() => openEditDialog(task)}
                         >
                           <EditIcon />
                         </IconButton>
@@ -219,118 +276,112 @@ export function TaskList() {
           </TableBody>
         </Table>
       </TableContainer>
+
       <TablePagination
         rowsPerPageOptions={[10, 25, 100]}
         component="div"
         count={tasks.length}
         rowsPerPage={rowsPerPage}
         page={page}
-        onPageChange={(_, newPage) => setPage(newPage)}
-        onRowsPerPageChange={(e) => {
-          setRowsPerPage(+e.target.value);
-          setPage(0);
-        }}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
       />
 
-      {/* Modal Criar Tarefa */}
+      {/* Dialog Create */}
       <Dialog open={openCreate} onClose={() => setOpenCreate(false)}>
-        <DialogTitle>Nova Tarefa</DialogTitle>
+        <DialogTitle>New Task</DialogTitle>
         <DialogContent>
           <TextField
+            autoFocus
             margin="dense"
+            label="Task Title"
             fullWidth
-            label="Título"
+            variant="standard"
             value={newTaskTitle}
             onChange={(e) => setNewTaskTitle(e.target.value)}
           />
           <Select
-            fullWidth
-            margin="dense"
             value={newTaskProjectId}
             onChange={(e) => setNewTaskProjectId(e.target.value)}
+            fullWidth
             displayEmpty
+            variant="standard"
           >
-            {projects.map((project) => (
-              <MenuItem key={project.id} value={project.id}>
-                {project.name}
+            <MenuItem value="">None</MenuItem>
+            {projects.map((p) => (
+              <MenuItem key={p.id} value={p.id}>
+                {p.name}
               </MenuItem>
             ))}
           </Select>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenCreate(false)}>Cancelar</Button>
-          <Button onClick={handleCreateTask} variant="contained">
-            Criar
+          <Button onClick={() => setOpenCreate(false)}>Cancel</Button>
+          <Button
+            onClick={handleCreateTask}
+            variant="contained"
+            color="primary"
+          >
+            Create
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Modal Visualizar Tarefa */}
-      <Dialog open={openView} onClose={() => setOpenView(false)}>
-        <DialogTitle>Detalhes da Tarefa</DialogTitle>
-        <DialogContent>
-          <Typography>
-            <strong>Nome:</strong> {selectedTask?.title}
-          </Typography>
-          <Typography>
-            <strong>Projeto:</strong> {selectedTask?.project?.name || 'Nenhum'}
-          </Typography>
-          <Typography>
-            <strong>Data de Criação:</strong>{' '}
-            {selectedTask
-              ? new Date(selectedTask.createdAt).toLocaleString()
-              : ''}
-          </Typography>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal Editar Tarefa */}
+      {/* Dialog Edit */}
       <Dialog open={openEdit} onClose={() => setOpenEdit(false)}>
-        <DialogTitle>Editar Tarefa</DialogTitle>
+        <DialogTitle>Edit Task</DialogTitle>
         <DialogContent>
           <TextField
             margin="dense"
+            label="Task Title"
             fullWidth
-            label="Título"
-            value={selectedTask?.title || ''}
-            onChange={(e) =>
-              setSelectedTask((prev) =>
-                prev ? { ...prev, title: e.target.value } : prev,
-              )
-            }
+            variant="standard"
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
           />
           <Select
+            value={editProjectId}
+            onChange={(e) => setEditProjectId(e.target.value)}
             fullWidth
-            margin="dense"
-            value={selectedTask?.projectId || ''}
-            onChange={(e) =>
-              setSelectedTask((prev) =>
-                prev ? { ...prev, projectId: e.target.value } : prev,
-              )
-            }
+            variant="standard"
             displayEmpty
           >
-            {projects.map((project) => (
-              <MenuItem key={project.id} value={project.id}>
-                {project.name}
+            <MenuItem value="">None</MenuItem>
+            {projects.map((p) => (
+              <MenuItem key={p.id} value={p.id}>
+                {p.name}
               </MenuItem>
             ))}
           </Select>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenEdit(false)}>Cancelar</Button>
+          <Button onClick={() => setOpenEdit(false)}>Cancel</Button>
           <Button
-            onClick={() =>
-              selectedTask &&
-              handleUpdateTask({
-                title: selectedTask.title,
-                projectId: selectedTask.projectId,
-              })
-            }
+            onClick={handleUpdateTask}
             variant="contained"
+            color="primary"
           >
-            Salvar
+            Save
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog Details */}
+      <Dialog open={openDetails} onClose={() => setOpenDetails(false)}>
+        <DialogTitle>Task Details</DialogTitle>
+        <DialogContent>
+          <p>
+            <strong>Title:</strong> {selectedTask?.title}
+          </p>
+          <p>
+            <strong>Project:</strong> {selectedTask?.project?.name || 'None'}
+          </p>
+          <p>
+            <strong>Created at:</strong> {selectedTask?.createdAt}
+          </p>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDetails(false)}>Close</Button>
         </DialogActions>
       </Dialog>
     </Stack>
