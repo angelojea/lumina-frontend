@@ -1,10 +1,8 @@
-import axios from "axios";
-import { useContext, useEffect } from "react";
-import { useNavigator } from "../AppRouter";
-import { AppContext } from "../contexts/AppContext";
-import { User } from "../schemas/User";
-
-let alreadyRunning = false;
+import axios from 'axios';
+import { useContext, useEffect } from 'react';
+import { useNavigator } from '../AppRouter';
+import { AppContext } from '../contexts/AppContext';
+import { User } from '../schemas/User';
 
 export function GoogleCallback() {
   const navigate = useNavigator();
@@ -12,17 +10,18 @@ export function GoogleCallback() {
 
   useEffect(() => {
     (async () => {
-      if (alreadyRunning) return;
-      alreadyRunning = true;
-      const { data } = await axios.get(
-        `http://localhost:4000/auth/google/callback${window.location.search}`,
-        {}
-      );
-      const user: User = data;
+      try {
+        const { data } = await axios.get('http://localhost:4000/auth/me', {
+          withCredentials: true,
+        });
+        const user: User = data;
 
-      signInUser(user);
-
-      navigate("/home");
+        signInUser(user);
+        navigate('/home');
+      } catch (error) {
+        console.error('Erro ao buscar usuário', error);
+        navigate('/');
+      }
     })();
   }, []);
 
