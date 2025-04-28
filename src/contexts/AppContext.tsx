@@ -6,7 +6,7 @@ import {
   Logout as LogoutIcon,
   MoreHoriz as MoreIcon,
   BackupTable as ProjectsIcon,
-} from "@mui/icons-material";
+} from '@mui/icons-material';
 import {
   Avatar,
   Box,
@@ -21,10 +21,10 @@ import {
   Theme,
   ThemeProvider,
   Typography,
-} from "@mui/material";
-import { createContext, PropsWithChildren, useContext, useState } from "react";
-import { RouterPaths, useNavigator, useRouteMatch } from "../AppRouter";
-import { User } from "../schemas/User";
+} from '@mui/material';
+import { createContext, PropsWithChildren, useContext, useState } from 'react';
+import { RouterPaths, useNavigator, useRouteMatch } from '../AppRouter';
+import { User } from '../schemas/User';
 
 type AppContextProps = {
   theme: Theme;
@@ -43,15 +43,15 @@ type AppContextUserProps = {
 };
 
 function getSignedInUser() {
-  const storage = localStorage.getItem("logged-in");
+  const storage = localStorage.getItem('logged-in');
   return storage
-    ? (JSON.parse(localStorage.getItem("logged-in") || "{}") as User)
+    ? (JSON.parse(localStorage.getItem('logged-in') || '{}') as User)
     : undefined;
 }
 
 export const AppContext = createContext<AppContextProps>({
   theme: {} as Theme,
-  title: "",
+  title: '',
   setTitle: (t: string) => {},
   getSignedInUser,
   signInUser: () => {},
@@ -64,22 +64,22 @@ export function AppProvider({ children }: PropsWithChildren) {
 
   const routeTitle = routeMatch?.title;
 
-  const [pageTitle, setPageTitle] = useState("");
+  const [pageTitle, setPageTitle] = useState('');
   const [dark, setDark] = useState(
-    Boolean(localStorage.getItem("dark")) || false
+    Boolean(localStorage.getItem('dark')) || false,
   );
   const [lightTheme] = useState(
     createTheme({
       cssVariables: true,
-    })
+    }),
   );
   const [darkTheme] = useState(
     createTheme({
       cssVariables: true,
       palette: {
-        mode: "dark",
+        mode: 'dark',
       },
-    })
+    }),
   );
   const [user, setUser] = useState<User | undefined>(getSignedInUser());
 
@@ -91,27 +91,28 @@ export function AppProvider({ children }: PropsWithChildren) {
   const activeTheme = dark ? darkTheme : lightTheme;
 
   const menuItems: { title: string; icon: any; route: RouterPaths }[] = [
-    { title: "Home", icon: <Home />, route: "/home" },
-    { title: "Projects", icon: <ProjectsIcon />, route: "/projects" },
+    { title: 'Home', icon: <Home />, route: '/home' },
+    { title: 'Projects', icon: <ProjectsIcon />, route: '/projects' },
   ];
 
   const contextProps: AppContextProps = {
     theme: activeTheme,
-    title: String(pageTitle || routeTitle || ""),
+    title: String(pageTitle || routeTitle || ''),
     setTitle: setPageTitle,
     user,
     getSignedInUser: () => {
-      const storage = localStorage.getItem("logged-in");
+      const storage = localStorage.getItem('logged-in');
       return storage
-        ? (JSON.parse(localStorage.getItem("logged-in") || "{}") as User)
+        ? (JSON.parse(localStorage.getItem('logged-in') || '{}') as User)
         : undefined;
     },
     signInUser: (user) => {
-      localStorage.setItem("logged-in", JSON.stringify(user));
+      localStorage.setItem('logged-in', JSON.stringify(user));
       setUser(user);
     },
     signOutUser: () => {
-      localStorage.removeItem("logged-in");
+      localStorage.removeItem('logged-in');
+      setUser(undefined);
     },
   };
 
@@ -119,12 +120,12 @@ export function AppProvider({ children }: PropsWithChildren) {
     <AppContext.Provider value={contextProps}>
       <Stack bgcolor={activeTheme.palette.background.default}>
         <Stack
-          direction={"row"}
+          direction={'row'}
           padding={3}
-          justifyContent={"space-between"}
-          alignItems={"center"}
+          justifyContent={'space-between'}
+          alignItems={'center'}
         >
-          <Stack direction={"row"} spacing={2}>
+          <Stack direction={'row'} spacing={2}>
             {routeMatch?.showBackBtn && (
               <IconButton onClick={() => navigator(-1)}>
                 <GoBackIcon htmlColor={activeTheme.palette.text.primary} />
@@ -135,7 +136,7 @@ export function AppProvider({ children }: PropsWithChildren) {
             </Typography>
           </Stack>
 
-          <Stack direction={"row"} spacing={2}>
+          <Stack direction={'row'} spacing={2}>
             {user && (
               <>
                 <IconButton
@@ -168,7 +169,7 @@ export function AppProvider({ children }: PropsWithChildren) {
             <IconButton
               onClick={() => {
                 setDark(!dark);
-                localStorage.setItem("dark", String(!dark));
+                localStorage.setItem('dark', String(!dark));
               }}
             >
               {dark ? (
@@ -195,7 +196,7 @@ export function AppProvider({ children }: PropsWithChildren) {
                     onClick={() => {
                       setAnchorAvatarEl(null);
                       contextProps.signOutUser();
-                      window.location.reload();
+                      navigator('/');
                     }}
                   >
                     <ListItemIcon>
@@ -216,7 +217,7 @@ export function AppProvider({ children }: PropsWithChildren) {
           </Stack>
         </Stack>
         <ThemeProvider theme={activeTheme}>
-          <Box width={"fit-content"} padding={3}>
+          <Box width={'fit-content'} padding={3}>
             {children}
           </Box>
         </ThemeProvider>
