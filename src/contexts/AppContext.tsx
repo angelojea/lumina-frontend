@@ -93,6 +93,7 @@ export function AppProvider({ children }: PropsWithChildren) {
   const menuItems: { title: string; icon: any; route: RouterPaths }[] = [
     { title: 'Home', icon: <Home />, route: '/home' },
     { title: 'Projects', icon: <ProjectsIcon />, route: '/projects' },
+    { title: 'Tasks', icon: <ProjectsIcon />, route: '/tasks' },
   ];
 
   const contextProps: AppContextProps = {

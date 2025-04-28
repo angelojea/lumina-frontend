@@ -1,25 +1,28 @@
-import { observable } from "mobx";
-import { useEffect, useState } from "react";
+import { observable } from 'mobx';
+import { useEffect, useState } from 'react';
 import {
   BrowserRouter,
   Route,
   Routes,
   useLocation,
   useNavigate,
-} from "react-router-dom";
-import { AppProvider } from "./contexts/AppContext";
-import { GoogleCallback } from "./pages/GoogleCallback";
-import { Home } from "./pages/Home";
-import { ProjectDetail } from "./pages/ProjectDetail";
-import { ProjectList } from "./pages/ProjectList";
-import { Public } from "./pages/Welcome";
+} from 'react-router-dom';
+import { AppProvider } from './contexts/AppContext';
+import { GoogleCallback } from './pages/GoogleCallback';
+import { Home } from './pages/Home';
+import { ProjectDetail } from './pages/ProjectDetail';
+import { ProjectList } from './pages/ProjectList';
+import { Public } from './pages/Welcome';
+import { TaskList } from './pages/TaskList';
 
 export type RouterPaths =
-  | "/home"
-  | "/projects/:id"
-  | "/projects"
-  | "/"
-  | "/google/callback";
+  | '/home'
+  | '/projects/:id'
+  | '/projects'
+  | '/'
+  | '/google/callback'
+  | '/tasks'
+  | '/tasks/:id';
 
 type AppRouterConfigMatch = {
   path: RouterPaths;
@@ -30,28 +33,34 @@ type AppRouterConfigMatch = {
 
 export const AppRouterConfig: { [key: string]: AppRouterConfigMatch } = {
   Home: {
-    path: "/home",
+    path: '/home',
     element: <Home />,
-    title: "Home",
+    title: 'Home',
   },
   ProjectDetail: {
-    path: "/projects/:id",
+    path: '/projects/:id',
     element: <ProjectDetail />,
   },
   ProjectList: {
-    path: "/projects",
+    path: '/projects',
     element: <ProjectList />,
     showBackBtn: true,
-    title: "All Projects",
+    title: 'All Projects',
   },
   Public: {
-    path: "/",
+    path: '/',
     element: <Public />,
-    title: "Welcome!",
+    title: 'Welcome!',
   },
   GoogleCallback: {
-    path: "/google/callback",
+    path: '/google/callback',
     element: <GoogleCallback />,
+  },
+  TaskList: {
+    path: '/tasks',
+    element: <TaskList />,
+    showBackBtn: true,
+    title: 'All Tasks',
   },
 };
 
@@ -66,11 +75,11 @@ export function useNavigator() {
 export function useRouteMatch() {
   const location = useLocation();
   const [match, setMatch] = useState<AppRouterConfigMatch | undefined>(
-    Object.values(AppRouterConfig).find((x) => x.path === location.pathname)
+    Object.values(AppRouterConfig).find((x) => x.path === location.pathname),
   );
   useEffect(() => {
     setMatch(
-      Object.values(AppRouterConfig).find((x) => x.path === location.pathname)
+      Object.values(AppRouterConfig).find((x) => x.path === location.pathname),
     );
   }, [location]);
 
@@ -88,7 +97,7 @@ export function AppRouter() {
               path={route.path}
               element={route.element}
               action={() => {
-                console.log("testtt");
+                console.log('testtt');
 
                 return true;
               }}
