@@ -1,31 +1,32 @@
-import { observable } from "mobx";
 import { useEffect, useState } from "react";
-import {
-  BrowserRouter,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
-import { AppProvider } from "./contexts/AppContext";
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { useAuthContext } from "./contexts/AuthContext";
+import { AppProvider } from "./contexts/ThemeContext";
 import { GoogleCallback } from "./pages/GoogleCallback";
 import { Home } from "./pages/Home";
 import { ProjectDetail } from "./pages/ProjectDetail";
 import { ProjectList } from "./pages/ProjectList";
-import { Public } from "./pages/Welcome";
+import { TaskDetail } from "./pages/TaskDetail";
+import { TaskList } from "./pages/TaskList";
+import { Root } from "./pages/Welcome";
 
 export type RouterPaths =
   | "/home"
   | "/projects/:id"
   | "/projects"
+  | "/tasks"
+  | "/tasks/:id"
   | "/"
-  | "/google/callback";
+  | "/google/callback"
+  | ":id";
 
 type AppRouterConfigMatch = {
   path: RouterPaths;
   element: any;
+  public: boolean;
   title?: string;
   showBackBtn?: boolean;
+  children?: AppRouterConfigMatch[];
 };
 
 export const AppRouterConfig: { [key: string]: AppRouterConfigMatch } = {
@@ -33,31 +34,51 @@ export const AppRouterConfig: { [key: string]: AppRouterConfigMatch } = {
     path: "/home",
     element: <Home />,
     title: "Home",
+    public: false,
   },
-  ProjectDetail: {
-    path: "/projects/:id",
-    element: <ProjectDetail />,
+  Root: {
+    path: "/",
+    element: <Root />,
+    title: "Welcome!",
+    public: true,
   },
   ProjectList: {
     path: "/projects",
     element: <ProjectList />,
     showBackBtn: true,
     title: "All Projects",
+    public: false,
+    children: [
+      {
+        path: ":id",
+        element: <ProjectDetail />,
+        showBackBtn: true,
+        title: "All Projects",
+        public: false,
+      },
+    ],
   },
-  Public: {
-    path: "/",
-    element: <Public />,
-    title: "Welcome!",
+  TaskDetail: {
+    path: "/tasks/:id",
+    element: <TaskDetail />,
+    public: false,
+  },
+  TaskList: {
+    path: "/tasks",
+    element: <TaskList />,
+    showBackBtn: true,
+    title: "All Tasks",
+    public: false,
   },
   GoogleCallback: {
     path: "/google/callback",
     element: <GoogleCallback />,
+    public: true,
   },
 };
 
 export function useNavigator() {
   const navRouter = useNavigate();
-  LocationObservable.showBackBtn = !LocationObservable.showBackBtn;
   return (route: RouterPaths | -1) => {
     navRouter(route as any);
   };
@@ -65,40 +86,114 @@ export function useNavigator() {
 
 export function useRouteMatch() {
   const location = useLocation();
-  const [match, setMatch] = useState<AppRouterConfigMatch | undefined>(
-    Object.values(AppRouterConfig).find((x) => x.path === location.pathname)
-  );
+
+  const getCurrentRouteMatch = () => {
+    let found: AppRouterConfigMatch | undefined = undefined;
+    const iterateConfigs = (configs: AppRouterConfigMatch[], parentsRoute: string) => {
+      for (let i = 0; i < configs.length; i++) {
+        const config = configs[i];
+        const route = `${parentsRoute}/${config.path}`.replace("//", "/");
+
+        const fragsPath = route.split("/");
+        const fragsLocation = location.pathname.split("/");
+
+        console.log(fragsPath);
+        console.log(fragsLocation);
+
+        if (
+          fragsPath.length === fragsLocation.length &&
+          fragsPath.every((frag, i) => frag.startsWith(":") || fragsLocation[i] === frag)
+        ) {
+          found = config;
+          return;
+        }
+
+        if (config.children) {
+          iterateConfigs(config.children, route);
+        }
+      }
+    };
+    iterateConfigs(Object.values(AppRouterConfig), "");
+    return found || AppRouterConfig.Root;
+  };
+  const currRoute = getCurrentRouteMatch();
+
+  // const currRoute =
+  //   pickableRoutes.find((route) => {
+  //     const fragsPath = route.path.split("/");
+  //     const fragsLocation = location.pathname.split("/");
+
+  //     return fragsPath.length === fragsLocation.length && fragsPath.every((frag, i) => fragsLocation[i] === frag);
+  //   }) || AppRouterConfig.Root;
+
+  const [match, setMatch] = useState<AppRouterConfigMatch>(currRoute);
   useEffect(() => {
-    setMatch(
-      Object.values(AppRouterConfig).find((x) => x.path === location.pathname)
-    );
+    setMatch(currRoute);
   }, [location]);
 
   return match;
+}
+
+function mapRoute(route: AppRouterConfigMatch) {
+  return (
+    <Route key={route.path} path={route.path} element={route.element}>
+      {route.children && route.children.map((inner, i) => mapRoute(inner))}
+    </Route>
+  );
+}
+
+function RoutesMapper() {
+  const { isUserSignedIn } = useAuthContext();
+  const routeMatch = useRouteMatch();
+
+  // User trying to access a forbidden route
+  if (!isUserSignedIn && !routeMatch.public) {
+    return (
+      <Routes>
+        <Route path="*" element={<Navigate replace to="/" />} />
+      </Routes>
+    );
+  }
+
+  if (!isUserSignedIn && routeMatch.public) {
+    return (
+      <Routes>
+        {Object.values(AppRouterConfig)
+          .filter((x) => x.public)
+          .map((route) => (
+            <Route key={route.path} path={route.path} element={route.element}>
+              {route.children && route.children.length > 0 ? (
+                <>
+                  {route.children.map((inner) => (
+                    <Route key={inner.path} path={inner.path} element={inner.element} />
+                  ))}
+                </>
+              ) : (
+                <></>
+              )}
+            </Route>
+          ))}
+        <Route path="*" element={<Navigate replace to="/home" />} />
+      </Routes>
+    );
+  }
+
+  return (
+    <Routes>
+      {Object.values(AppRouterConfig)
+        .filter((x) => x.path != "/")
+        .map((route) => mapRoute(route))}
+      <Route path="*" element={<Navigate replace to="/home" />} />
+    </Routes>
+  );
 }
 
 export function AppRouter() {
   return (
     <BrowserRouter>
       <AppProvider>
-        <Routes>
-          {Object.values(AppRouterConfig).map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={route.element}
-              action={() => {
-                console.log("testtt");
-
-                return true;
-              }}
-            />
-          ))}
-        </Routes>
+        <RoutesMapper />
       </AppProvider>
     </BrowserRouter>
   );
 }
-export const LocationObservable = observable({
-  showBackBtn: false,
-});

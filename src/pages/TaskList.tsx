@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@mui/material";
 import { ReactNode, useState } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { useNavigator } from "../AppRouter";
 import { generateId } from "../utils/functions";
 
@@ -50,7 +50,7 @@ interface Row {
   actions?: ReactNode;
 }
 
-export function ProjectList() {
+export function TaskList() {
   const navigate = useNavigator();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -108,11 +108,11 @@ export function ProjectList() {
             {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
               return (
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                  {columns.map((column, i) => {
+                  {columns.map((column) => {
                     const value = row[column.id];
                     return (
                       <TableCell key={column.id} align={column.align}>
-                        {i === 0 ? <Link to={row.id}>{value}</Link> : <>{value}</>}
+                        {value}
                       </TableCell>
                     );
                   })}

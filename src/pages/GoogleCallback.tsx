@@ -1,14 +1,14 @@
 import axios from "axios";
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigator } from "../AppRouter";
-import { AppContext } from "../contexts/AppContext";
+import { useAuthContext } from "../contexts/AuthContext";
 import { User } from "../schemas/User";
 
 let alreadyRunning = false;
 
 export function GoogleCallback() {
   const navigate = useNavigator();
-  const { signInUser } = useContext(AppContext);
+  const { signInUser } = useAuthContext();
 
   useEffect(() => {
     (async () => {
