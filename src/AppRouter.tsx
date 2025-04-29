@@ -14,6 +14,7 @@ import { ProjectDetail } from './pages/ProjectDetail';
 import { ProjectList } from './pages/ProjectList';
 import { Public } from './pages/Welcome';
 import { TaskList } from './pages/TaskList';
+import { Profile } from './pages/Profile';
 
 export type RouterPaths =
   | '/home'
@@ -22,7 +23,8 @@ export type RouterPaths =
   | '/'
   | '/google/callback'
   | '/tasks'
-  | '/tasks/:id';
+  | '/tasks/:id'
+  | '/profile';
 
 type AppRouterConfigMatch = {
   path: RouterPaths;
@@ -61,6 +63,11 @@ export const AppRouterConfig: { [key: string]: AppRouterConfigMatch } = {
     element: <TaskList />,
     showBackBtn: true,
     title: 'All Tasks',
+  },
+  Profile: {
+    path: '/profile',
+    element: <Profile />,
+    title: 'Perfil',
   },
 };
 

@@ -6,6 +6,7 @@ import {
   Logout as LogoutIcon,
   MoreHoriz as MoreIcon,
   BackupTable as ProjectsIcon,
+  Person as PersonIcon,
 } from '@mui/icons-material';
 import {
   Avatar,
@@ -40,6 +41,7 @@ type AppContextUserProps = {
   id: string;
   name: string;
   email: string;
+  picture: string;
 };
 
 function getSignedInUser() {
@@ -193,6 +195,18 @@ export function AppProvider({ children }: PropsWithChildren) {
                   open={avatarOpen}
                   onClose={() => setAnchorAvatarEl(null)}
                 >
+                  <MenuItem
+                    onClick={() => {
+                      setAnchorAvatarEl(null);
+                      navigator('/profile');
+                    }}
+                  >
+                    <ListItemIcon>
+                      <PersonIcon />{' '}
+                      {/* Ícone provisório, podemos trocar depois */}
+                    </ListItemIcon>
+                    <ListItemText>Profile</ListItemText>
+                  </MenuItem>
                   <MenuItem
                     onClick={() => {
                       setAnchorAvatarEl(null);
