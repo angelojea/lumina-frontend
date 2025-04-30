@@ -21,6 +21,10 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
@@ -28,6 +32,8 @@ import { RouterPaths, useNavigator } from '../AppRouter';
 import { useLoading } from '../contexts/LoadingContext';
 import { Task } from '../schemas/Task';
 import { deleteTask, listTasks } from '../services/Task.service';
+import { listProjects } from '../services/Project.service';
+import { Project } from '../schemas/Project';
 
 interface Column {
   id: 'id' | 'title' | 'status' | 'priority' | 'actions';
@@ -63,6 +69,10 @@ export function TaskList() {
   const { setLoading } = useLoading();
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [priorityFilter, setPriorityFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [projectFilter, setProjectFilter] = useState('');
+  const [projects, setProjects] = useState<Project[]>([]);
 
   const refresh = () => setFlag(!flag);
 
@@ -73,11 +83,26 @@ export function TaskList() {
 
       setLoading(true);
       try {
-        setRows(await listTasks());
+        let tasks = await listTasks();
+
+        if (statusFilter) {
+          tasks = tasks.filter((t) => t.status === statusFilter);
+        }
+        if (priorityFilter) {
+          tasks = tasks.filter((t) => t.priority === priorityFilter);
+        }
+        if (projectFilter) {
+          tasks = tasks.filter((t) => t.projectId === projectFilter);
+        }
+
+        setRows(tasks);
+
+        const allProjects = await listProjects();
+        setProjects(allProjects.filter((p) => p.status !== 'cancelled'));
       } catch (error) {}
       setLoading(false);
     })();
-  }, [location, flag]);
+  }, [location, flag, statusFilter, priorityFilter, projectFilter]);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -122,6 +147,55 @@ export function TaskList() {
 
   return (
     <Stack>
+      <Stack direction="row" spacing={2} mb={2}>
+        <Select
+          value={priorityFilter}
+          onChange={(e) => setPriorityFilter(e.target.value)}
+          displayEmpty
+        >
+          <MenuItem value="">All Priorities</MenuItem>
+          <MenuItem value="low">Low</MenuItem>
+          <MenuItem value="medium">Medium</MenuItem>
+          <MenuItem value="high">High</MenuItem>
+        </Select>
+
+        <Select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          displayEmpty
+        >
+          <MenuItem value="">All Status</MenuItem>
+          <MenuItem value="new">New</MenuItem>
+          <MenuItem value="in_progress">In Progress</MenuItem>
+          <MenuItem value="paused">Paused</MenuItem>
+          <MenuItem value="completed">Completed</MenuItem>
+          <MenuItem value="cancelled">Cancelled</MenuItem>
+        </Select>
+
+        <Select
+          value={projectFilter}
+          onChange={(e) => setProjectFilter(e.target.value)}
+          displayEmpty
+        >
+          <MenuItem value="">All Projects</MenuItem>
+          {projects.map((project) => (
+            <MenuItem key={project.id} value={project.id}>
+              {project.name}
+            </MenuItem>
+          ))}
+        </Select>
+
+        <Button
+          variant="outlined"
+          onClick={() => {
+            setStatusFilter('');
+            setPriorityFilter('');
+            setProjectFilter('');
+          }}
+        >
+          Clear Filters
+        </Button>
+      </Stack>
       <TableContainer sx={{ maxHeight: 440 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
@@ -139,6 +213,13 @@ export function TaskList() {
           </TableHead>
           <TableBody>
             {rows
+              .filter((row) => {
+                return (
+                  (!priorityFilter || row.priority === priorityFilter) &&
+                  (!statusFilter || row.status === statusFilter) &&
+                  (!projectFilter || row.projectId === projectFilter)
+                );
+              })
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row) => {
                 return (
