@@ -177,7 +177,7 @@ export function ProjectList() {
                         return (
                           <TableCell key={column.id} align={column.align}>
                             {column.id === 'name' ? (
-                              <Link to={row.id}>{value}</Link>
+                              <>{value}</>
                             ) : column.id === 'status' ? (
                               getReadableStatus(value)
                             ) : (
