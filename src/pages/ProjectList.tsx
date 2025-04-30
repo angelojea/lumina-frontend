@@ -1,6 +1,12 @@
-import { Delete as DeleteIcon, Edit as EditIcon, Visibility as VisibilityIcon } from "@mui/icons-material";
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Visibility as VisibilityIcon,
+} from "@mui/icons-material";
 import {
   IconButton,
+  SpeedDial,
   Stack,
   Table,
   TableBody,
@@ -9,14 +15,17 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Tooltip,
 } from "@mui/material";
-import { ReactNode, useState } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { useNavigator } from "../AppRouter";
-import { generateId } from "../utils/functions";
+import { useLoading } from "../contexts/LoadingContext";
+import { Project } from "../schemas/Project";
+import { listProjects } from "../services/Project.service";
 
 interface Column {
-  id: "id" | "name" | "projectId" | "status" | "actions";
+  id: "id" | "name" | "actions";
   label: string;
   minWidth?: number;
   align?: "left" | "center" | "right";
@@ -25,16 +34,6 @@ interface Column {
 
 const columns: readonly Column[] = [
   { id: "name", label: "Name", minWidth: 170 },
-  {
-    id: "projectId",
-    label: "ProjectId",
-    minWidth: 170,
-  },
-  {
-    id: "status",
-    label: "Status",
-    minWidth: 170,
-  },
   {
     id: "actions",
     label: "Actions",
@@ -45,15 +44,25 @@ const columns: readonly Column[] = [
 interface Row {
   id: string;
   name: string;
-  projectId: number;
-  status: string;
-  actions?: ReactNode;
 }
 
 export function ProjectList() {
   const navigate = useNavigator();
+  const location = useLocation();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rows, setRows] = useState<Project[]>([]);
+  const { setLoading } = useLoading();
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      try {
+        setRows(await listProjects());
+      } catch (error) {}
+      setLoading(false);
+    })();
+  }, [location]);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -63,33 +72,6 @@ export function ProjectList() {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
-
-  function createData(name: string, projectId: number, status: string): Row {
-    return {
-      id: generateId(),
-      name,
-      projectId,
-      status,
-      actions: (
-        <Stack direction={"row"}>
-          <IconButton color="default" type="button">
-            <VisibilityIcon />
-          </IconButton>
-          <IconButton color="primary" type="button">
-            <EditIcon />
-          </IconButton>
-          <IconButton color="error" type="button">
-            <DeleteIcon />
-          </IconButton>
-        </Stack>
-      ),
-    };
-  }
-  const rows = [
-    createData("Projecto 1", 1324171354, "3287263"),
-    createData("Projecto 2", 1403500365, "9596961"),
-    createData("Projecto 13", 60483973, "301340"),
-  ];
 
   return (
     <Stack>
@@ -109,6 +91,24 @@ export function ProjectList() {
               return (
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
                   {columns.map((column, i) => {
+                    if (column.id === "actions") {
+                      return (
+                        <TableCell key={column.id}>
+                          <Stack direction={"row"}>
+                            <IconButton color="default" type="button">
+                              <VisibilityIcon />
+                            </IconButton>
+                            <IconButton color="primary" type="button">
+                              <EditIcon />
+                            </IconButton>
+                            <IconButton color="error" type="button">
+                              <DeleteIcon />
+                            </IconButton>
+                          </Stack>
+                        </TableCell>
+                      );
+                    }
+
                     const value = row[column.id];
                     return (
                       <TableCell key={column.id} align={column.align}>
@@ -131,6 +131,14 @@ export function ProjectList() {
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
+      <Tooltip title="New Project" placement="left">
+        <SpeedDial
+          ariaLabel="New Record"
+          sx={{ position: "absolute", bottom: 32, right: 32 }}
+          icon={<AddIcon />}
+          onClick={() => navigate("/projects/new")}
+        />
+      </Tooltip>
       <Outlet />
     </Stack>
   );

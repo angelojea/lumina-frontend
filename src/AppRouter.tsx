@@ -13,12 +13,14 @@ import { Root } from "./pages/Welcome";
 export type RouterPaths =
   | "/home"
   | "/projects/:id"
+  | "/projects/new"
   | "/projects"
   | "/tasks"
   | "/profile"
   | "/tasks/:id"
   | "/"
   | "/google/callback"
+  | "/new"
   | ":id";
 
 type AppRouterConfigMatch = {

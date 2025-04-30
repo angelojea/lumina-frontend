@@ -11,7 +11,6 @@ const btnStyles: SxProps = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  cursor: "pointer",
 };
 
 const TopBtn = ({ children }: PropsWithChildren) => (
@@ -19,7 +18,6 @@ const TopBtn = ({ children }: PropsWithChildren) => (
     elevation={6}
     sx={{
       ...btnStyles,
-      "&:hover": { boxShadow: 12 },
     }}
   >
     <Stack spacing={1} p={10}>
@@ -28,12 +26,13 @@ const TopBtn = ({ children }: PropsWithChildren) => (
   </Paper>
 );
 
-const BottomBtn = ({ children }: PropsWithChildren) => (
+const BottomBtn = ({ children, ...props }: PropsWithChildren & any) => (
   <Paper
+    {...props}
     variant="outlined"
-    elevation={2}
     sx={{
       ...btnStyles,
+      cursor: "pointer",
       "&:hover": { boxShadow: 4 },
     }}
   >
@@ -57,19 +56,19 @@ export function Home() {
       </Grid>
       <Grid container spacing={5}>
         <Grid size={4}>
-          <BottomBtn>
+          <BottomBtn onClick={() => navigator("/tasks")}>
             <TasksIcon sx={{ fontSize: 80 }} />
             <Typography>My Tasks</Typography>
           </BottomBtn>
         </Grid>
         <Grid size={4}>
-          <BottomBtn>
+          <BottomBtn onClick={() => navigator("/projects")}>
             <ProjectsIcon sx={{ fontSize: 80 }} />
             <Typography>Projects</Typography>
           </BottomBtn>
         </Grid>
         <Grid size={4}>
-          <BottomBtn>
+          <BottomBtn onClick={() => navigator("/profile")}>
             <ProfileIcon sx={{ fontSize: 80 }} />
             <Typography>Profile</Typography>
           </BottomBtn>

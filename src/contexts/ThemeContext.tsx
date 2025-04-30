@@ -133,8 +133,9 @@ export function AppProvider({ children }: PropsWithChildren) {
                     <MenuIcon />
                   </Button>
                   <Menu anchorEl={anchorRoutesEl} open={routesOpen} onClose={() => setAnchorRoutesEl(null)}>
-                    {menuItems.map((item) => (
+                    {menuItems.map((item, i) => (
                       <MenuItem
+                        key={i}
                         onClick={() => {
                           setAnchorRoutesEl(null);
                           navigator(item.route);

@@ -1,9 +1,12 @@
 import { Box, Button, Modal, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { useNavigator } from "../AppRouter";
+import { useLoading } from "../contexts/LoadingContext";
 import { FormInputControl } from "../form/form-control";
 import { useZForm } from "../form/useForm";
 import { projectSchema } from "../schemas/Project";
+import { getProject } from "../services/Project.service";
 const style = {
   position: "absolute",
   top: "50%",
@@ -19,46 +22,53 @@ const style = {
 export function ProjectDetail() {
   const navigate = useNavigator();
   const [isOpen, setIsOpen] = useState(true);
+  const { id } = useParams();
+  const { setLoading } = useLoading();
 
   useEffect(() => {
-    fetch("http://localhost:4000/projects", {
-      method: "GET",
-      credentials: "include",
-    });
+    (async () => {
+      if (!id || id == "new") return;
+
+      setLoading(true);
+      try {
+        const project = (await getProject(id!)) as any;
+        Object.keys(project).forEach((x) => form.setFieldValue(x, project[x], true));
+      } catch (error) {}
+      setLoading(false);
+    })();
   }, []);
+
+  const close = () => {
+    setIsOpen(false);
+    navigate(-1);
+  };
 
   const form = useZForm(projectSchema, {
     onSubmit: async (values) => {
-      console.log(values);
+      await fetch("http://localhost:4000/projects", {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify(values),
+      });
+      close();
     },
   });
 
   return (
-    <Modal
-      open={isOpen}
-      onClose={() => {
-        setIsOpen(false);
-        navigate(-1);
-      }}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
-    >
+    <Modal open={isOpen} onClose={close} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
       <Box sx={style}>
         <Stack spacing={4}>
           <FormInputControl schema={projectSchema} form={form} field="name" />
           {/* <FormInputControl schema={projectSchema} form={form} field="description" /> */}
           <Stack direction={"row-reverse"} spacing={2}>
-            <Button variant="contained" onClick={() => form.submitForm()} disabled={form.isValid}>
+            <Button type="submit" variant="contained" onClick={form.submitForm} disabled={!form.dirty || !form.isValid}>
               Save
             </Button>
-            <Button
-              onClick={() => {
-                setIsOpen(false);
-                navigate(-1);
-              }}
-            >
-              Cancel
-            </Button>
+            <Button onClick={close}>Cancel</Button>
           </Stack>
         </Stack>
       </Box>
