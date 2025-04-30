@@ -1,4 +1,6 @@
 import {
+  BarChart,
+  PieChart,
   Person as ProfileIcon,
   BackupTable as ProjectsIcon,
   FormatListBulleted as TasksIcon,
@@ -20,7 +22,7 @@ const TopBtn = ({ children }: PropsWithChildren) => (
       ...btnStyles,
     }}
   >
-    <Stack spacing={1} p={10}>
+    <Stack spacing={1} p={10} alignItems={"center"} justifyContent={"center"}>
       {children}
     </Stack>
   </Paper>
@@ -48,10 +50,16 @@ export function Home() {
     <Stack spacing={3}>
       <Grid container spacing={5}>
         <Grid size={6}>
-          <TopBtn>X / Y Completed</TopBtn>
+          <TopBtn>
+            <BarChart sx={{ fontSize: 80 }} />
+            <Typography>X in the last 24h</Typography>
+          </TopBtn>
         </Grid>
         <Grid size={6}>
-          <TopBtn>X in the last 24h</TopBtn>
+          <TopBtn>
+            <PieChart sx={{ fontSize: 80 }} />
+            <Typography>X / Y Completed</Typography>
+          </TopBtn>
         </Grid>
       </Grid>
       <Grid container spacing={5}>
