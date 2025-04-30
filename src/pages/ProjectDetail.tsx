@@ -47,7 +47,7 @@ export function ProjectDetail() {
 
   const form = useZForm(projectSchema, {
     onSubmit: async (values) => {
-      await fetch("http://localhost:4000/projects", {
+      await fetch(`${process.env.SERVER_URL}/projects`, {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",

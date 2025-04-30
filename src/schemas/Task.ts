@@ -1,6 +1,6 @@
 import { date, InferType, object, string } from "yup";
 import { generateId } from "../utils/functions";
-export const projectSchema = object({
+export const taskSchema = object({
   id: string().default(generateId()).required(""),
   name: string().label("Name").required(),
   description: string().label("Description").default("").meta({ rows: 5 }).required(),
@@ -9,4 +9,4 @@ export const projectSchema = object({
   status: string().label("Status").default("new"),
 });
 
-export type Project = InferType<typeof projectSchema>;
+export type Task = InferType<typeof taskSchema>;

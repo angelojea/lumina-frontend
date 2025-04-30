@@ -60,17 +60,8 @@ export const AppRouterConfig: { [key: string]: AppRouterConfigMatch } = {
         showBackBtn: true,
         title: "All Projects",
         public: false,
-        loader: ({ request }) =>
-          fetch("/api/dashboard.json", {
-            signal: request.signal,
-          }),
       },
     ],
-  },
-  TaskDetail: {
-    path: "/tasks/:id",
-    element: <TaskDetail />,
-    public: false,
   },
   TaskList: {
     path: "/tasks",
@@ -78,6 +69,15 @@ export const AppRouterConfig: { [key: string]: AppRouterConfigMatch } = {
     showBackBtn: true,
     title: "All Tasks",
     public: false,
+    children: [
+      {
+        path: ":id",
+        element: <TaskDetail />,
+        showBackBtn: true,
+        title: "All Tasks",
+        public: false,
+      },
+    ],
   },
   GoogleCallback: {
     path: "/google/callback",

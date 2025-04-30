@@ -24,7 +24,11 @@ export function Profile() {
     setError("");
 
     try {
-      const response = await axios.patch("http://localhost:4000/auth/me", { name, picture }, { withCredentials: true });
+      const response = await axios.patch(
+        `${process.env.SERVER_URL}/auth/me`,
+        { name, picture },
+        { withCredentials: true }
+      );
 
       alert("Perfil atualizado com sucesso!");
       signInUser(response.data);
