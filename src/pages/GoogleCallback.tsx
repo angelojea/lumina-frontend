@@ -14,7 +14,9 @@ export function GoogleCallback() {
     (async () => {
       setLoading(true);
       try {
-        const response = await fetch(`http://localhost:4000/auth/google/callback${window.location.search}`);
+        const response = await fetch(`http://localhost:4000/auth/google/callback${window.location.search}`, {
+          credentials: "include",
+        });
         const data = await response.json();
 
         const user: User = data;

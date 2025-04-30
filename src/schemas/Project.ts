@@ -14,7 +14,7 @@ export const projectSchema = object({
     .default("")
     .meta({ rows: 5 })
     .required(),
-  createdOn: date().label("Created On").default(new Date()),
+  createdAt: date().label("Created On").default(new Date()),
   status: string().label("Status").default("new"),
   //   userId: string().label("User").default(""),
 });

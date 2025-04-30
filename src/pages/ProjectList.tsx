@@ -101,7 +101,13 @@ export function ProjectList() {
                       return (
                         <TableCell key={column.id}>
                           <Stack direction={"row"}>
-                            <IconButton color="default" type="button">
+                            <IconButton
+                              color="default"
+                              type="button"
+                              onClick={() => {
+                                navigate(row.id as RouterPaths, { readonly: true });
+                              }}
+                            >
                               <VisibilityIcon />
                             </IconButton>
                             <IconButton color="primary" type="button">

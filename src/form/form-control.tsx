@@ -47,6 +47,7 @@ export function FormInputControl<TIn extends ObjectSchema<any>>({
           value={form.values[field]}
           //
           //
+          {...(disabled ? { focused: true } : {})}
           {...(form.values[field] ? { defaultValue: form.values[field], focused: true } : {})}
           {...(label || fieldObj.spec.label ? { label: fieldObj.spec.label } : {})}
           {...(rows ? { rows: rows, multiline: true } : {})}

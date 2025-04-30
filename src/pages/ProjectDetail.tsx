@@ -1,6 +1,6 @@
 import { Box, Button, Modal, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useNavigator } from "../AppRouter";
 import { useLoading } from "../contexts/LoadingContext";
 import { FormInputControl } from "../form/form-control";
@@ -24,6 +24,8 @@ export function ProjectDetail() {
   const [isOpen, setIsOpen] = useState(true);
   const { id } = useParams();
   const { setLoading } = useLoading();
+  const location = useLocation();
+  const state = location.state;
 
   useEffect(() => {
     (async () => {
@@ -62,8 +64,8 @@ export function ProjectDetail() {
     <Modal open={isOpen} onClose={close} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
       <Box sx={style}>
         <Stack spacing={4}>
-          <FormInputControl schema={projectSchema} form={form} field="name" />
-          <FormInputControl schema={projectSchema} form={form} field="description" />
+          <FormInputControl schema={projectSchema} form={form} field="name" disabled={state?.readonly} />
+          <FormInputControl schema={projectSchema} form={form} field="description" disabled={state?.readonly} />
           <Stack direction={"row-reverse"} spacing={2}>
             <Button type="submit" variant="contained" onClick={form.submitForm} disabled={!form.dirty || !form.isValid}>
               Save

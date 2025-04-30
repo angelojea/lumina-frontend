@@ -88,8 +88,8 @@ export const AppRouterConfig: { [key: string]: AppRouterConfigMatch } = {
 
 export function useNavigator() {
   const navRouter = useNavigate();
-  return (route: RouterPaths | -1) => {
-    navRouter(route as any);
+  return (route: RouterPaths | -1, state?: any) => {
+    navRouter(route as any, { state });
   };
 }
 
