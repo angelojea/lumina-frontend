@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { AppProvider } from "./contexts/AppContext";
 import { useAuthContext } from "./contexts/AuthContext";
-import { AppProvider } from "./contexts/ThemeContext";
 import { GoogleCallback } from "./pages/GoogleCallback";
 import { Home } from "./pages/Home";
 import { ProjectDetail } from "./pages/ProjectDetail";
@@ -16,8 +16,9 @@ export type RouterPaths =
   | "/projects/new"
   | "/projects"
   | "/tasks"
-  | "/profile"
+  | "/tasks/new"
   | "/tasks/:id"
+  | "/profile"
   | "/"
   | "/google/callback"
   | "/new"
@@ -30,6 +31,7 @@ type AppRouterConfigMatch = {
   title?: string;
   showBackBtn?: boolean;
   children?: AppRouterConfigMatch[];
+  loader?: (...args: any[]) => any;
 };
 
 export const AppRouterConfig: { [key: string]: AppRouterConfigMatch } = {
@@ -58,6 +60,10 @@ export const AppRouterConfig: { [key: string]: AppRouterConfigMatch } = {
         showBackBtn: true,
         title: "All Projects",
         public: false,
+        loader: ({ request }) =>
+          fetch("/api/dashboard.json", {
+            signal: request.signal,
+          }),
       },
     ],
   },
@@ -118,14 +124,6 @@ export function useRouteMatch() {
   };
   const currRoute = getCurrentRouteMatch();
 
-  // const currRoute =
-  //   pickableRoutes.find((route) => {
-  //     const fragsPath = route.path.split("/");
-  //     const fragsLocation = location.pathname.split("/");
-
-  //     return fragsPath.length === fragsLocation.length && fragsPath.every((frag, i) => fragsLocation[i] === frag);
-  //   }) || AppRouterConfig.Root;
-
   const [match, setMatch] = useState<AppRouterConfigMatch>(currRoute);
   useEffect(() => {
     setMatch(currRoute);
@@ -136,7 +134,7 @@ export function useRouteMatch() {
 
 function mapRoute(route: AppRouterConfigMatch, key: string) {
   return (
-    <Route key={key} path={route.path} element={route.element}>
+    <Route key={key} path={route.path} element={route.element} loader={route.loader}>
       {route.children && route.children.map((inner, i) => mapRoute(inner, key + i))}
     </Route>
   );

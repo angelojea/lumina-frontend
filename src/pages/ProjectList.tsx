@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { useNavigator } from "../AppRouter";
+import { RouterPaths, useNavigator } from "../AppRouter";
 import { useLoading } from "../contexts/LoadingContext";
 import { Project } from "../schemas/Project";
 import { deleteProject, listProjects } from "../services/Project.service";
@@ -59,6 +59,9 @@ export function ProjectList() {
 
   useEffect(() => {
     (async () => {
+      const route: RouterPaths = "/projects";
+      if (location.pathname !== route) return;
+
       setLoading(true);
       try {
         setRows(await listProjects());

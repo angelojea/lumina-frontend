@@ -31,8 +31,8 @@ export function ProjectDetail() {
 
       setLoading(true);
       try {
-        const project = (await getProject(id!)) as any;
-        Object.keys(project).forEach((x) => form.setFieldValue(x, project[x], true));
+        const project = await getProject(id!);
+        form.setValues(project);
       } catch (error) {}
       setLoading(false);
     })();
@@ -63,7 +63,7 @@ export function ProjectDetail() {
       <Box sx={style}>
         <Stack spacing={4}>
           <FormInputControl schema={projectSchema} form={form} field="name" />
-          {/* <FormInputControl schema={projectSchema} form={form} field="description" /> */}
+          <FormInputControl schema={projectSchema} form={form} field="description" />
           <Stack direction={"row-reverse"} spacing={2}>
             <Button type="submit" variant="contained" onClick={form.submitForm} disabled={!form.dirty || !form.isValid}>
               Save
