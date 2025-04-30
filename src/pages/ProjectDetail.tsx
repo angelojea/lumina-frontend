@@ -1,6 +1,9 @@
-import { Box, Modal, Typography } from "@mui/material";
-import { useState } from "react";
+import { Box, Button, Modal, Stack } from "@mui/material";
+import { useEffect, useState } from "react";
 import { useNavigator } from "../AppRouter";
+import { FormInputControl } from "../form/form-control";
+import { useZForm } from "../form/useForm";
+import { projectSchema } from "../schemas/Project";
 const style = {
   position: "absolute",
   top: "50%",
@@ -16,6 +19,20 @@ const style = {
 export function ProjectDetail() {
   const navigate = useNavigator();
   const [isOpen, setIsOpen] = useState(true);
+
+  useEffect(() => {
+    fetch("http://localhost:4000/projects", {
+      method: "GET",
+      credentials: "include",
+    });
+  }, []);
+
+  const form = useZForm(projectSchema, {
+    onSubmit: async (values) => {
+      console.log(values);
+    },
+  });
+
   return (
     <Modal
       open={isOpen}
@@ -27,12 +44,23 @@ export function ProjectDetail() {
       aria-describedby="modal-modal-description"
     >
       <Box sx={style}>
-        <Typography id="modal-modal-title" variant="h6" component="h2">
-          Text in a modal
-        </Typography>
-        <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-          Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-        </Typography>
+        <Stack spacing={4}>
+          <FormInputControl schema={projectSchema} form={form} field="name" />
+          {/* <FormInputControl schema={projectSchema} form={form} field="description" /> */}
+          <Stack direction={"row-reverse"} spacing={2}>
+            <Button variant="contained" onClick={() => form.submitForm()} disabled={form.isValid}>
+              Save
+            </Button>
+            <Button
+              onClick={() => {
+                setIsOpen(false);
+                navigate(-1);
+              }}
+            >
+              Cancel
+            </Button>
+          </Stack>
+        </Stack>
       </Box>
     </Modal>
   );

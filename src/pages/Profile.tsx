@@ -1,40 +1,36 @@
-import { Button, Stack, TextField, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { useAppContext } from '../contexts/AppContext';
-import axios from 'axios';
+import { Button, Stack, TextField, Typography } from "@mui/material";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useAuthContext } from "../contexts/AuthContext";
 
 export function Profile() {
-  const { user, signInUser } = useAppContext();
-  const [name, setName] = useState('');
-  const [picture, setPicture] = useState('');
-  const [error, setError] = useState('');
+  const { user, signInUser } = useAuthContext();
+  const [name, setName] = useState("");
+  const [picture, setPicture] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (user) {
       setName(user.name);
-      setPicture(user.picture || '');
+      setPicture(user.picture || "");
     }
   }, [user]);
 
   async function handleSave() {
     if (!name.trim()) {
-      setError('Name is required');
+      setError("Name is required");
       return;
     }
-    setError('');
+    setError("");
 
     try {
-      const response = await axios.patch(
-        'http://localhost:4000/auth/me',
-        { name, picture },
-        { withCredentials: true },
-      );
+      const response = await axios.patch("http://localhost:4000/auth/me", { name, picture }, { withCredentials: true });
 
-      alert('Perfil atualizado com sucesso!');
+      alert("Perfil atualizado com sucesso!");
       signInUser(response.data);
     } catch (error) {
-      console.error('Erro ao atualizar perfil', error);
-      alert('Erro ao atualizar perfil');
+      console.error("Erro ao atualizar perfil", error);
+      alert("Erro ao atualizar perfil");
     }
   }
 
@@ -51,12 +47,7 @@ export function Profile() {
         fullWidth
       />
 
-      <TextField
-        label="Picture URL"
-        value={picture}
-        onChange={(e) => setPicture(e.target.value)}
-        fullWidth
-      />
+      <TextField label="Picture URL" value={picture} onChange={(e) => setPicture(e.target.value)} fullWidth />
 
       <Button variant="contained" color="primary" onClick={handleSave}>
         Save

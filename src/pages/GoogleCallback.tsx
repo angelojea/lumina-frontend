@@ -14,7 +14,10 @@ export function GoogleCallback() {
     (async () => {
       if (alreadyRunning) return;
       alreadyRunning = true;
-      const { data } = await axios.get(`http://localhost:4000/auth/google/callback${window.location.search}`, {});
+      const { data } = await axios.get(`http://localhost:4000/auth/google/callback${window.location.search}`, {
+        withCredentials: true,
+      });
+
       const user: User = data;
 
       signInUser(user);

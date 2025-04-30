@@ -15,6 +15,7 @@ export type RouterPaths =
   | "/projects/:id"
   | "/projects"
   | "/tasks"
+  | "/profile"
   | "/tasks/:id"
   | "/"
   | "/google/callback"
@@ -97,9 +98,6 @@ export function useRouteMatch() {
         const fragsPath = route.split("/");
         const fragsLocation = location.pathname.split("/");
 
-        console.log(fragsPath);
-        console.log(fragsLocation);
-
         if (
           fragsPath.length === fragsLocation.length &&
           fragsPath.every((frag, i) => frag.startsWith(":") || fragsLocation[i] === frag)
@@ -134,10 +132,10 @@ export function useRouteMatch() {
   return match;
 }
 
-function mapRoute(route: AppRouterConfigMatch) {
+function mapRoute(route: AppRouterConfigMatch, key: string) {
   return (
-    <Route key={route.path} path={route.path} element={route.element}>
-      {route.children && route.children.map((inner, i) => mapRoute(inner))}
+    <Route key={key} path={route.path} element={route.element}>
+      {route.children && route.children.map((inner, i) => mapRoute(inner, key + i))}
     </Route>
   );
 }
@@ -160,12 +158,12 @@ function RoutesMapper() {
       <Routes>
         {Object.values(AppRouterConfig)
           .filter((x) => x.public)
-          .map((route) => (
-            <Route key={route.path} path={route.path} element={route.element}>
+          .map((route, i) => (
+            <Route key={i} path={route.path} element={route.element}>
               {route.children && route.children.length > 0 ? (
                 <>
-                  {route.children.map((inner) => (
-                    <Route key={inner.path} path={inner.path} element={inner.element} />
+                  {route.children.map((inner, j) => (
+                    <Route key={j} path={inner.path} element={inner.element} />
                   ))}
                 </>
               ) : (
@@ -182,7 +180,7 @@ function RoutesMapper() {
     <Routes>
       {Object.values(AppRouterConfig)
         .filter((x) => x.path != "/")
-        .map((route) => mapRoute(route))}
+        .map((route, i) => mapRoute(route, String(i)))}
       <Route path="*" element={<Navigate replace to="/home" />} />
     </Routes>
   );

@@ -1,30 +1,45 @@
-import { Box, Grid2 as Grid, Paper, Stack } from "@mui/material";
+import {
+  Person as ProfileIcon,
+  BackupTable as ProjectsIcon,
+  FormatListBulleted as TasksIcon,
+} from "@mui/icons-material";
+import { Grid2 as Grid, Paper, Stack, SxProps, Typography } from "@mui/material";
 import { PropsWithChildren } from "react";
 import { useNavigator } from "../AppRouter";
 
+const btnStyles: SxProps = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+};
+
 const TopBtn = ({ children }: PropsWithChildren) => (
   <Paper
-    elevation={4}
+    elevation={6}
     sx={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
+      ...btnStyles,
+      "&:hover": { boxShadow: 12 },
     }}
   >
-    <Box p={10}>{children}</Box>
+    <Stack spacing={1} p={10}>
+      {children}
+    </Stack>
   </Paper>
 );
 
 const BottomBtn = ({ children }: PropsWithChildren) => (
   <Paper
     variant="outlined"
+    elevation={2}
     sx={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
+      ...btnStyles,
+      "&:hover": { boxShadow: 4 },
     }}
   >
-    <Box p={10}>{children}</Box>
+    <Stack spacing={1} p={6} alignItems={"center"} justifyContent={"center"}>
+      {children}
+    </Stack>
   </Paper>
 );
 
@@ -42,13 +57,22 @@ export function Home() {
       </Grid>
       <Grid container spacing={5}>
         <Grid size={4}>
-          <BottomBtn>Birl</BottomBtn>
+          <BottomBtn>
+            <TasksIcon sx={{ fontSize: 80 }} />
+            <Typography>My Tasks</Typography>
+          </BottomBtn>
         </Grid>
         <Grid size={4}>
-          <BottomBtn>Birl</BottomBtn>
+          <BottomBtn>
+            <ProjectsIcon sx={{ fontSize: 80 }} />
+            <Typography>Projects</Typography>
+          </BottomBtn>
         </Grid>
         <Grid size={4}>
-          <BottomBtn>Birl</BottomBtn>
+          <BottomBtn>
+            <ProfileIcon sx={{ fontSize: 80 }} />
+            <Typography>Profile</Typography>
+          </BottomBtn>
         </Grid>
       </Grid>
     </Stack>

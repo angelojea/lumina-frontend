@@ -4,6 +4,8 @@ import {
   Home as HomeIcon,
   LightMode as LightModeIcon,
   Logout as LogoutIcon,
+  Menu as MenuIcon,
+  Person as ProfileIcon,
   BackupTable as ProjectsIcon,
   FormatListBulleted as TasksIcon,
 } from "@mui/icons-material";
@@ -68,6 +70,8 @@ export function AppProvider({ children }: PropsWithChildren) {
 
   const [anchorAvatarEl, setAnchorAvatarEl] = useState<null | HTMLElement>();
   const avatarOpen = Boolean(anchorAvatarEl);
+  const [anchorRoutesEl, setAnchorRoutesEl] = useState<null | HTMLElement>();
+  const routesOpen = Boolean(anchorRoutesEl);
 
   const activeTheme = dark ? darkTheme : lightTheme;
 
@@ -88,6 +92,12 @@ export function AppProvider({ children }: PropsWithChildren) {
       title: "Projects",
       icon: <ProjectsIcon />,
       route: "/projects",
+      variant: "outlined",
+    },
+    {
+      title: "Profile",
+      icon: <ProfileIcon />,
+      route: "/profile",
       variant: "outlined",
     },
   ];
@@ -113,20 +123,36 @@ export function AppProvider({ children }: PropsWithChildren) {
             </Stack>
 
             <Stack direction={"row"} spacing={1}>
-              {user &&
-                menuItems.map((item) => (
-                  <Tooltip title={item.title}>
-                    <Paper sx={{ borderRadius: "50%" }} elevation={4}>
-                      <Button
-                        sx={menuItemBtnStyles}
-                        variant={item.variant || "text"}
-                        onClick={(ev) => navigator(item.route)}
+              {user && (
+                <>
+                  <Button
+                    onClick={(ev) => {
+                      setAnchorRoutesEl(ev.currentTarget);
+                    }}
+                  >
+                    <MenuIcon />
+                  </Button>
+                  <Menu anchorEl={anchorRoutesEl} open={routesOpen} onClose={() => setAnchorRoutesEl(null)}>
+                    {menuItems.map((item) => (
+                      <MenuItem
+                        onClick={() => {
+                          setAnchorRoutesEl(null);
+                          navigator(item.route);
+                        }}
                       >
-                        {item.icon}
-                      </Button>
-                    </Paper>
-                  </Tooltip>
-                ))}
+                        <ListItemIcon>{item.icon}</ListItemIcon>
+                        <ListItemText>{item.title}</ListItemText>
+                      </MenuItem>
+                    ))}
+                    <MenuItem onClick={() => setAnchorRoutesEl(null)}>
+                      <ListItemIcon>
+                        <LogoutIcon />
+                      </ListItemIcon>
+                      <ListItemText>Sign Out</ListItemText>
+                    </MenuItem>
+                  </Menu>
+                </>
+              )}
               <Paper sx={{ borderRadius: "50%" }} elevation={4}>
                 <Tooltip title={dark ? "Dark" : "Light"}>
                   <Button
@@ -141,32 +167,36 @@ export function AppProvider({ children }: PropsWithChildren) {
                   </Button>
                 </Tooltip>
               </Paper>
+
               {user ? (
                 <>
-                  <Button
-                    onClick={(ev) => {
-                      setAnchorAvatarEl(ev.currentTarget);
-                    }}
-                  >
-                    <Avatar alt={user.name} src={user?.picture} />
-                  </Button>
-                  <Menu anchorEl={anchorAvatarEl} open={avatarOpen} onClose={() => setAnchorAvatarEl(null)}>
-                    <MenuItem
-                      onClick={() => {
-                        setAnchorAvatarEl(null);
-                        signOutUser();
-                        window.location.reload();
+                  <Paper sx={{ borderRadius: "50%" }} elevation={4}>
+                    <Button
+                      sx={{ height: 64, width: 64, borderRadius: "50%", padding: 0 }}
+                      onClick={(ev) => {
+                        setAnchorAvatarEl(ev.currentTarget);
                       }}
                     >
-                      <ListItemIcon>
-                        <LogoutIcon />
-                      </ListItemIcon>
-                      <ListItemText>Sign Out</ListItemText>
-                    </MenuItem>
-                  </Menu>
+                      <Avatar alt={user.name} src={user?.picture} sx={{ height: 64, width: 64 }} />
+                    </Button>
+                    <Menu anchorEl={anchorAvatarEl} open={avatarOpen} onClose={() => setAnchorAvatarEl(null)}>
+                      <MenuItem
+                        onClick={() => {
+                          setAnchorAvatarEl(null);
+                          signOutUser();
+                          window.location.reload();
+                        }}
+                      >
+                        <ListItemIcon>
+                          <LogoutIcon />
+                        </ListItemIcon>
+                        <ListItemText>Sign Out</ListItemText>
+                      </MenuItem>
+                    </Menu>
+                  </Paper>
                 </>
               ) : (
-                <Button variant="contained" href="http://localhost:4000/auth/google">
+                <Button variant="outlined" href="http://localhost:4000/auth/google">
                   Sign In
                 </Button>
               )}

@@ -11,9 +11,7 @@ type AuthContextProps = {
 
 function getSignedInUser() {
   const storage = localStorage.getItem("logged-in");
-  return storage
-    ? (JSON.parse(localStorage.getItem("logged-in") || "{}") as User)
-    : undefined;
+  return storage ? (JSON.parse(localStorage.getItem("logged-in") || "{}") as User) : undefined;
 }
 
 export const AuthContext = createContext<AuthContextProps>({
@@ -31,9 +29,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     isUserSignedIn: Boolean(user),
     getSignedInUser: () => {
       const storage = localStorage.getItem("logged-in");
-      return storage
-        ? (JSON.parse(localStorage.getItem("logged-in") || "{}") as User)
-        : undefined;
+      return storage ? (JSON.parse(localStorage.getItem("logged-in") || "{}") as User) : undefined;
     },
     signInUser: (user) => {
       localStorage.setItem("logged-in", JSON.stringify(user));
@@ -44,9 +40,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     },
   };
 
-  return (
-    <AuthContext.Provider value={contextProps}>{children}</AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={contextProps}>{children}</AuthContext.Provider>;
 }
 
 export function useAuthContext() {
