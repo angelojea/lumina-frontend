@@ -1,7 +1,7 @@
 import { Project } from "../schemas/Project";
 
 export async function createProject(proj: Project) {
-  return fetch(`${process.env.SERVER_URL}/projects`, {
+  return fetch(`${process.env.REACT_APP_SERVER_URL}/projects`, {
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
@@ -13,7 +13,7 @@ export async function createProject(proj: Project) {
 }
 
 export async function listProjects(): Promise<Project[]> {
-  const response = await fetch(`${process.env.SERVER_URL}/projects`, {
+  const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/projects`, {
     method: "GET",
     credentials: "include",
   });
@@ -23,7 +23,7 @@ export async function listProjects(): Promise<Project[]> {
 }
 
 export async function getProject(id: string): Promise<Project> {
-  const response = await fetch(`${process.env.SERVER_URL}/projects/${id}`, {
+  const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/projects/${id}`, {
     method: "GET",
     credentials: "include",
   });
@@ -33,7 +33,7 @@ export async function getProject(id: string): Promise<Project> {
 }
 
 export async function deleteProject(id: string): Promise<void> {
-  await fetch(`${process.env.SERVER_URL}/projects/${id}`, {
+  await fetch(`${process.env.REACT_APP_SERVER_URL}/projects/${id}`, {
     method: "DELETE",
     credentials: "include",
   });

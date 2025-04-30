@@ -1,7 +1,7 @@
 import { Task } from "../schemas/Task";
 
 export async function createTask(proj: Task) {
-  return fetch(`${process.env.SERVER_URL}/tasks`, {
+  return fetch(`${process.env.REACT_APP_SERVER_URL}/tasks`, {
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
@@ -13,7 +13,7 @@ export async function createTask(proj: Task) {
 }
 
 export async function listTasks(): Promise<Task[]> {
-  const response = await fetch(`${process.env.SERVER_URL}/tasks`, {
+  const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/tasks`, {
     method: "GET",
     credentials: "include",
   });
@@ -23,7 +23,7 @@ export async function listTasks(): Promise<Task[]> {
 }
 
 export async function getTask(id: string): Promise<Task> {
-  const response = await fetch(`${process.env.SERVER_URL}/tasks/${id}`, {
+  const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/tasks/${id}`, {
     method: "GET",
     credentials: "include",
   });
@@ -33,7 +33,7 @@ export async function getTask(id: string): Promise<Task> {
 }
 
 export async function deleteTask(id: string): Promise<void> {
-  await fetch(`${process.env.SERVER_URL}/tasks/${id}`, {
+  await fetch(`${process.env.REACT_APP_SERVER_URL}/tasks/${id}`, {
     method: "DELETE",
     credentials: "include",
   });

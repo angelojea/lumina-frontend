@@ -14,9 +14,12 @@ export function GoogleCallback() {
     (async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${process.env.SERVER_URL}/auth/google/callback${window.location.search}`, {
-          credentials: "include",
-        });
+        const response = await fetch(
+          `${process.env.REACT_APP_SERVER_URL}/auth/google/callback${window.location.search}`,
+          {
+            credentials: "include",
+          }
+        );
         const data = await response.json();
 
         const user: User = data;

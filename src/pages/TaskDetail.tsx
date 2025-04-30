@@ -47,7 +47,7 @@ export function TaskDetail() {
 
   const form = useZForm(taskSchema, {
     onSubmit: async (values) => {
-      await fetch(`${process.env.SERVER_URL}/tasks`, {
+      await fetch(`${process.env.REACT_APP_SERVER_URL}/tasks`, {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",

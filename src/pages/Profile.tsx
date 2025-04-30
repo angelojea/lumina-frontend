@@ -25,7 +25,7 @@ export function Profile() {
 
     try {
       const response = await axios.patch(
-        `${process.env.SERVER_URL}/auth/me`,
+        `${process.env.REACT_APP_SERVER_URL}/auth/me`,
         { name, picture },
         { withCredentials: true }
       );

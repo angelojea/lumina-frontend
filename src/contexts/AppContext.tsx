@@ -192,7 +192,7 @@ export function AppProvider({ children }: PropsWithChildren) {
                   </Paper>
                 </>
               ) : (
-                <Button variant="outlined" href={`${process.env.SERVER_URL}/auth/google`}>
+                <Button variant="outlined" href={`${process.env.REACT_APP_SERVER_URL}/auth/google`}>
                   <Stack direction={"row"} alignItems={"center"} spacing={1}>
                     <svg
                       version="1.1"
