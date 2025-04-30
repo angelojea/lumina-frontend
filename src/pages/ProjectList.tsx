@@ -22,7 +22,7 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { useNavigator } from "../AppRouter";
 import { useLoading } from "../contexts/LoadingContext";
 import { Project } from "../schemas/Project";
-import { listProjects } from "../services/Project.service";
+import { deleteProject, listProjects } from "../services/Project.service";
 
 interface Column {
   id: "id" | "name" | "actions";
@@ -50,9 +50,12 @@ export function ProjectList() {
   const navigate = useNavigator();
   const location = useLocation();
   const [page, setPage] = useState(0);
+  const [flag, setFlag] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [rows, setRows] = useState<Project[]>([]);
   const { setLoading } = useLoading();
+
+  const refresh = () => setFlag(!flag);
 
   useEffect(() => {
     (async () => {
@@ -62,7 +65,7 @@ export function ProjectList() {
       } catch (error) {}
       setLoading(false);
     })();
-  }, [location]);
+  }, [location, flag]);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -101,7 +104,19 @@ export function ProjectList() {
                             <IconButton color="primary" type="button">
                               <EditIcon />
                             </IconButton>
-                            <IconButton color="error" type="button">
+                            <IconButton
+                              color="error"
+                              type="button"
+                              onClick={async () => {
+                                if (!window.confirm("You sure?")) return;
+                                setLoading(true);
+                                try {
+                                  await deleteProject(row.id);
+                                } catch (error) {}
+                                setLoading(false);
+                                refresh();
+                              }}
+                            >
                               <DeleteIcon />
                             </IconButton>
                           </Stack>

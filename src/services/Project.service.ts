@@ -31,3 +31,10 @@ export async function getProject(id: string): Promise<Project> {
   const data = await response.json();
   return data as Project;
 }
+
+export async function deleteProject(id: string): Promise<void> {
+  await fetch(`http://localhost:4000/projects/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+}
